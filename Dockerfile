@@ -7,7 +7,6 @@
 # performance.
 
 FROM netflixoss/java:8
-MAINTAINER Ches Martin <ches@whiskeyandgrits.net>
 
 # The Scala 2.12 build is currently recommended by the project.
 ENV KAFKA_VERSION=0.10.2.1 KAFKA_SCALA_VERSION=2.12 JMX_PORT=7203
@@ -19,11 +18,11 @@ RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y \
     ca-certificates
 
-# Download Kafka binary distribution
-ADD http://www.us.apache.org/dist/kafka/${KAFKA_VERSION}/${KAFKA_RELEASE_ARCHIVE} /tmp/
-ADD https://dist.apache.org/repos/dist/release/kafka/${KAFKA_VERSION}/${KAFKA_RELEASE_ARCHIVE}.md5 /tmp/
-
 WORKDIR /tmp
+
+# Download Kafka binary distribution
+RUN wget http://www.us.apache.org/dist/kafka/${KAFKA_VERSION}/${KAFKA_RELEASE_ARCHIVE}
+ADD https://dist.apache.org/repos/dist/release/kafka/${KAFKA_VERSION}/${KAFKA_RELEASE_ARCHIVE}.md5 .
 
 # Check artifact digest integrity
 RUN echo VERIFY CHECKSUM: && \
@@ -41,7 +40,7 @@ ADD start.sh /start.sh
 RUN groupadd kafka && \
   useradd -d /kafka -g kafka -s /bin/false kafka && \
   chown -R kafka:kafka /kafka /data /logs
-USER kafka
+
 ENV PATH /kafka/bin:$PATH
 WORKDIR /kafka
 
